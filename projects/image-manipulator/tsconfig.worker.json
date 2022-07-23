@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "outDir": "../../dist/image-manipulator/worker",
+    "lib": ["es2018", "webworker"],
+    "types": []
+  },
+  "include": [
+    "src/lib/helper/web-worker.ts",
+  ]
+}
