@@ -4,10 +4,11 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/worker",
     "lib": [
-      "es2018",
+      "es2015",
       "webworker"
     ],
-    "types": []
+    "types": [],
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.worker.ts"
