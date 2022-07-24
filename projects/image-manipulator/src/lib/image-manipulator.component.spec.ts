@@ -21,6 +21,6 @@ describe('ImageManipulatorComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-    component.postMessage();
+    component.test();
   });
 });

@@ -1,5 +1,8 @@
 import { Component, Inject } from '@angular/core';
 import { IMAGEMANIPULATION_WEBWORKER_FACTORY } from './helper/worker-factory';
+import { ConcreteImageManipulator, initLocal, initWebWorker } from './helper';
+import { Remote } from 'comlink';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'ngx-image-manipulator',
@@ -7,15 +10,22 @@ import { IMAGEMANIPULATION_WEBWORKER_FACTORY } from './helper/worker-factory';
   styleUrls: ['./image-manipulator.component.css'],
 })
 export class ImageManipulatorComponent {
-  private _webWorker?: Worker;
+  private comlinkObj: Remote<ConcreteImageManipulator> | undefined = undefined;
+  private sub: Subject<number> = new Subject<number>();
+  public currentProgress: number = 0;
   constructor(
     @Inject(IMAGEMANIPULATION_WEBWORKER_FACTORY)
-    workerFactory: () => Worker
+    private readonly workerFactory: () => Worker
   ) {
-    this._webWorker = workerFactory();
+    this.sub.subscribe((num) => (this.currentProgress = num));
   }
 
-  postMessage() {
-    this._webWorker?.postMessage('testmessage');
+  async initWebworker() {
+    initWebWorker();
+    this.comlinkObj = await initLocal(this.workerFactory, this.sub);
+  }
+
+  test() {
+    this.comlinkObj?.performWork();
   }
 }
