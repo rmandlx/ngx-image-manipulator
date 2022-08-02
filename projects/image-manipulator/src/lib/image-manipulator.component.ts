@@ -1,6 +1,6 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { IMAGEMANIPULATION_WEBWORKER_FACTORY } from './helper/worker-factory';
-import { ConcreteImageManipulator, initLocal, initWebWorker } from './helper';
+import { ImageManipulator, initLocal } from './helper';
 import { Remote } from 'comlink';
 import { Subject } from 'rxjs';
 
@@ -9,8 +9,10 @@ import { Subject } from 'rxjs';
   templateUrl: './image-manipulator.component.html',
   styleUrls: ['./image-manipulator.component.css'],
 })
-export class ImageManipulatorComponent {
-  private comlinkObj: Remote<ConcreteImageManipulator> | undefined = undefined;
+export class ImageManipulatorComponent<T extends ImageManipulator>
+  implements OnInit
+{
+  private comlinkObj: Remote<T> | undefined = undefined;
   private sub: Subject<number> = new Subject<number>();
   public currentProgress: number = 0;
   constructor(
@@ -20,12 +22,14 @@ export class ImageManipulatorComponent {
     this.sub.subscribe((num) => (this.currentProgress = num));
   }
 
-  async initWebworker() {
-    initWebWorker();
-    this.comlinkObj = await initLocal(this.workerFactory, this.sub);
+  async ngOnInit() {
+    this.comlinkObj = await initLocal<T>(this.workerFactory, this.sub);
   }
 
-  test() {
-    this.comlinkObj?.performWork();
+  public retrieveManipulator(): Remote<T> {
+    if (this.comlinkObj == null) {
+      throw new Error('Image Manipulator object is not initialized.');
+    }
+    return this.comlinkObj;
   }
 }

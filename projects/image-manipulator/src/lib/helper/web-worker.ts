@@ -1,13 +1,13 @@
 import * as Comlink from 'comlink';
 import { Remote } from 'comlink';
-import { ConcreteImageManipulator } from './image-manipulator';
+import { ImageManipulator } from './image-manipulator';
 import { Subject } from 'rxjs';
 
-export async function initLocal(
+export async function initLocal<T extends ImageManipulator>(
   workerFactory: () => Worker,
   progressSubject: Subject<number>
-): Promise<Remote<ConcreteImageManipulator>> {
-  const obj = Comlink.wrap(workerFactory()) as Remote<ConcreteImageManipulator>;
+): Promise<Remote<T>> {
+  const obj = Comlink.wrap(workerFactory()) as Remote<T>;
   const callbProxy = Comlink.proxy((progress: number) => {
     progressSubject.next(progress);
   });
@@ -15,6 +15,6 @@ export async function initLocal(
   return obj;
 }
 
-export function initWebWorker() {
-  Comlink.expose(new ConcreteImageManipulator());
+export function initWebWorker(imageManipulator: ImageManipulator) {
+  Comlink.expose(imageManipulator);
 }
