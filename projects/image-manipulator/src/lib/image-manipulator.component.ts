@@ -1,8 +1,12 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import { IMAGEMANIPULATION_WEBWORKER_FACTORY } from './helper/worker-factory';
-import { ImageManipulator, initLocal } from './helper';
+import { ImageManipulator, initLocal, InstantiationError } from './helper';
 import { Remote } from 'comlink';
 import { Subject } from 'rxjs';
+
+interface Class<T> {
+  new (...args: any[]): T;
+}
 
 @Component({
   selector: 'ngx-image-manipulator',
@@ -12,9 +16,17 @@ import { Subject } from 'rxjs';
 export class ImageManipulatorComponent<T extends ImageManipulator>
   implements OnInit
 {
-  private comlinkObj: Remote<T> | undefined = undefined;
+  @Input()
+  public manipulatorClass: Class<T> | null = null;
+  @Input()
+  public imageData: string | Blob | ImageData | null = null;
+
+  private remoteWorker: Remote<T> | null = null;
+  private syncWorker: T | null = null;
+
   private sub: Subject<number> = new Subject<number>();
-  public currentProgress: number = 0;
+  private currentProgress: number = 0;
+
   constructor(
     @Inject(IMAGEMANIPULATION_WEBWORKER_FACTORY)
     private readonly workerFactory: () => Worker
@@ -23,13 +35,38 @@ export class ImageManipulatorComponent<T extends ImageManipulator>
   }
 
   async ngOnInit() {
-    this.comlinkObj = await initLocal<T>(this.workerFactory, this.sub);
+    if (this.manipulatorClass == null) {
+      throw new InstantiationError(
+        'Could not create ImageManipulator because no Manipulator Class was given as Input!'
+      );
+    }
+    const copyManipulatorClass = this.manipulatorClass;
+    const manipulatorFactory = () => new copyManipulatorClass();
+
+    this.remoteWorker = await initLocal<T>(
+      this.workerFactory,
+      manipulatorFactory,
+      this.sub
+    );
+
+    console.log('testing remote worker');
+    // @ts-ignore
+    console.log(await this.remoteWorker.attribute);
   }
 
   public retrieveManipulator(): Remote<T> {
-    if (this.comlinkObj == null) {
+    console.log('retrieved manipulator');
+    if (this.remoteWorker == null) {
       throw new Error('Image Manipulator object is not initialized.');
     }
-    return this.comlinkObj;
+    return this.remoteWorker;
+  }
+
+  public getCurrentProgress(): number {
+    return this.currentProgress;
+  }
+
+  private isWebWorkerAvailable(): boolean {
+    return true;
   }
 }

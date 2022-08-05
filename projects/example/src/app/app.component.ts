@@ -14,7 +14,12 @@ export class AppComponent {
 
   constructor() {}
 
-  test() {
-    this.manipulator?.retrieveManipulator().performWork();
+  async test() {
+    const manipulator = this.manipulator?.retrieveManipulator();
+    await manipulator?.performWork();
+  }
+
+  getManipulatorClass() {
+    return ConcreteImageManipulator;
   }
 }
