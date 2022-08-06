@@ -13,6 +13,10 @@ export abstract class ImageManipulator {
     this.callback = progress;
   }
 
+  reset(): void {
+    this.stopFlag = false;
+  }
+
   stop(): void {
     if (this.callback != null) {
       this.callback(0);

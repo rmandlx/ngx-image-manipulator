@@ -19,6 +19,11 @@ export class AppComponent {
     await manipulator?.performWork();
   }
 
+  async stop() {
+    const manipulator = this.manipulator?.retrieveManipulator();
+    await manipulator?.stop();
+  }
+
   getManipulatorClass() {
     return ConcreteImageManipulator;
   }

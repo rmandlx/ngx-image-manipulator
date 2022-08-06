@@ -7,11 +7,11 @@ export class ConcreteImageManipulator extends ImageManipulator {
       counter += 1;
     }
     await this.progressCallback(10);
-    for (let i = 0; i < 1000000000; i++) {
+    for (let i = 0; i < 100000000; i++) {
       counter += 1;
     }
     await this.progressCallback(50);
-    for (let i = 0; i < 1000000000; i++) {
+    for (let i = 0; i < 100000000; i++) {
       counter += 1;
     }
     await this.progressCallback(100);

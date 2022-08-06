@@ -8,6 +8,41 @@ export function isWebWorkerAvailable(): boolean {
   return true;
 }
 
+function proxyWorker<T extends ImageManipulator>(given: Remote<T>): Remote<T> {
+  const basicFunctionNames = Object.getOwnPropertyNames(
+    ImageManipulator.prototype
+  ).filter((item) => typeof (given as any)[item] === 'function');
+
+  const proxied = new Proxy(given, {
+    get: (target, prop, receiver) => {
+      // @ts-ignore
+      const calledStuff = target[prop];
+      if (
+        calledStuff instanceof Function &&
+        typeof prop !== 'symbol' &&
+        basicFunctionNames.find((name) => prop === name)
+      ) {
+        // should not be proxied
+        return function (...args: any[]) {
+          return new Promise((resolve) =>
+            resolve(Reflect.apply(calledStuff, target, args))
+          );
+        };
+      } else if (calledStuff instanceof Function) {
+        return function (...args: any[]) {
+          return new Promise(async (resolve) => {
+            await target.reset();
+            resolve(Reflect.apply(calledStuff, target, args));
+          });
+        };
+      } else {
+        return Reflect.get(target, prop, receiver);
+      }
+    },
+  }) as Remote<T>;
+  return proxied;
+}
+
 export async function initLocal<T extends ImageManipulator>(
   workerFactory: () => Worker,
   manipulatorFactory: () => T,
@@ -19,29 +54,14 @@ export async function initLocal<T extends ImageManipulator>(
       progressSubject.next(progress);
     });
     await obj.init(callbProxy);
-    return obj;
+    return proxyWorker(obj);
   } else {
-    /*
-    const proxied = new Proxy(manipulatorFactory(), {
-      get: (target, prop, receiver) => {
-        // @ts-ignore
-        const calledStuff = target[prop];
-        if (calledStuff instanceof Function) {
-          return function (...args: any[]) {
-            return calledStuff.apply(target, args);
-          };
-        } else {
-          return Reflect.get(target, prop, receiver);
-        }
-      },
-    }) as Remote<T>;
-     */
     const obj = manipulatorFactory();
     const callb = (progress: number) => {
       progressSubject.next(progress);
     };
     await obj.init(callb);
-    return obj as Remote<T>;
+    return proxyWorker(obj as Remote<T>);
   }
 }
 
