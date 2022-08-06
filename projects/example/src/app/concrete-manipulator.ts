@@ -1,24 +1,19 @@
-import { ImageManipulator } from '../../../image-manipulator/src/lib/helper';
+import { ImageManipulator } from 'image-manipulator';
 
 export class ConcreteImageManipulator extends ImageManipulator {
-  performWork() {
-    if (this.callback == null) {
-      console.log('Callback has not been initialized.');
-      return;
-    }
-
+  async performWork() {
     let counter = 0;
-    for (let i = 0; i < 1000000; i++) {
+    for (let i = 0; i < 100000000; i++) {
       counter += 1;
     }
-    this.callback(10);
-    for (let i = 0; i < 10000000; i++) {
+    await this.progressCallback(10);
+    for (let i = 0; i < 1000000000; i++) {
       counter += 1;
     }
-    this.callback(50);
-    for (let i = 0; i < 10000000; i++) {
+    await this.progressCallback(50);
+    for (let i = 0; i < 1000000000; i++) {
       counter += 1;
     }
-    this.callback(100);
+    await this.progressCallback(100);
   }
 }

@@ -18,11 +18,21 @@ export class ImageManipulatorComponent<T extends ImageManipulator>
 {
   @Input()
   public manipulatorClass: Class<T> | null = null;
+
+  public _imageData: string | Blob | ImageData | null = null;
+
   @Input()
-  public imageData: string | Blob | ImageData | null = null;
+  set imageData(data: string | Blob | ImageData | null) {
+    this._imageData = data;
+  }
+
+  public _transform: ((data: ImageData) => ImageData) | null = null;
+  @Input()
+  set transform(transform: ((data: ImageData) => ImageData) | null) {
+    this._transform = transform;
+  }
 
   private remoteWorker: Remote<T> | null = null;
-  private syncWorker: T | null = null;
 
   private sub: Subject<number> = new Subject<number>();
   private currentProgress: number = 0;
@@ -40,6 +50,7 @@ export class ImageManipulatorComponent<T extends ImageManipulator>
         'Could not create ImageManipulator because no Manipulator Class was given as Input!'
       );
     }
+
     const copyManipulatorClass = this.manipulatorClass;
     const manipulatorFactory = () => new copyManipulatorClass();
 
@@ -48,10 +59,6 @@ export class ImageManipulatorComponent<T extends ImageManipulator>
       manipulatorFactory,
       this.sub
     );
-
-    console.log('testing remote worker');
-    // @ts-ignore
-    console.log(await this.remoteWorker.attribute);
   }
 
   public retrieveManipulator(): Remote<T> {
@@ -66,7 +73,7 @@ export class ImageManipulatorComponent<T extends ImageManipulator>
     return this.currentProgress;
   }
 
-  private isWebWorkerAvailable(): boolean {
-    return true;
+  public isInitialized(): boolean {
+    return this.remoteWorker != null;
   }
 }

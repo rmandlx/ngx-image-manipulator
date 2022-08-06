@@ -1,11 +1,11 @@
+import { ImageManipulator } from './image-manipulator';
 import * as Comlink from 'comlink';
 import { Remote } from 'comlink';
-import { ImageManipulator } from './image-manipulator';
 import { Subject } from 'rxjs';
 
 export function isWebWorkerAvailable(): boolean {
   //return typeof Worker !== 'undefined';
-  return false;
+  return true;
 }
 
 export async function initLocal<T extends ImageManipulator>(
@@ -21,21 +21,27 @@ export async function initLocal<T extends ImageManipulator>(
     await obj.init(callbProxy);
     return obj;
   } else {
-    return new Proxy(manipulatorFactory(), {
+    /*
+    const proxied = new Proxy(manipulatorFactory(), {
       get: (target, prop, receiver) => {
         // @ts-ignore
         const calledStuff = target[prop];
         if (calledStuff instanceof Function) {
           return function (...args: any[]) {
-            return new Promise((resolve) => resolve(calledStuff.apply(args)));
+            return calledStuff.apply(target, args);
           };
         } else {
-          return new Promise((resolve, reject) =>
-            resolve(Reflect.get(target, prop, receiver))
-          );
+          return Reflect.get(target, prop, receiver);
         }
       },
     }) as Remote<T>;
+     */
+    const obj = manipulatorFactory();
+    const callb = (progress: number) => {
+      progressSubject.next(progress);
+    };
+    await obj.init(callb);
+    return obj as Remote<T>;
   }
 }
 
