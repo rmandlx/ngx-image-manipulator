@@ -9,10 +9,13 @@ export function isWebWorkerAvailable(): boolean {
 }
 
 function proxyWorker<T extends ImageManipulator>(given: Remote<T>): Remote<T> {
+  // Retrieve the function names of the ImageManipulator base class, so that we can ignore them in our proxy
   const basicFunctionNames = Object.getOwnPropertyNames(
     ImageManipulator.prototype
   ).filter((item) => typeof (given as any)[item] === 'function');
 
+  // All additional functions of the given ImageManipulator are proxied, so that we can ensure the reset
+  // function is called before any function call
   const proxied = new Proxy(given, {
     get: (target, prop, receiver) => {
       // @ts-ignore
@@ -57,10 +60,10 @@ export async function initLocal<T extends ImageManipulator>(
     return proxyWorker(obj);
   } else {
     const obj = manipulatorFactory();
-    const callb = (progress: number) => {
+    const callbProxy = (progress: number) => {
       progressSubject.next(progress);
     };
-    await obj.init(callb);
+    await obj.init(callbProxy);
     return proxyWorker(obj as Remote<T>);
   }
 }

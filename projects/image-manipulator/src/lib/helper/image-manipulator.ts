@@ -7,7 +7,7 @@ import { progressCallback } from './worker-factory';
  */
 export abstract class ImageManipulator {
   private callback: progressCallback | null = null;
-  stopFlag = false;
+  private stopFlag = false;
 
   init(progress: progressCallback): void {
     this.callback = progress;
@@ -34,6 +34,8 @@ export abstract class ImageManipulator {
     }
 
     this.callback(progress);
+
+    // This allows that the stop function may be called.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     if (this.stopFlag) {

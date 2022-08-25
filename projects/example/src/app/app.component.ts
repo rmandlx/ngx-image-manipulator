@@ -12,12 +12,9 @@ export class AppComponent {
   @ViewChild('manipulator')
   manipulator: ImageManipulatorComponent<ConcreteImageManipulator> | null = null;
 
-  constructor() {}
+  blob: Blob | null = null;
 
-  async test() {
-    const manipulator = this.manipulator?.retrieveManipulator();
-    await manipulator?.performWork();
-  }
+  constructor() {}
 
   async stop() {
     const manipulator = this.manipulator?.retrieveManipulator();
@@ -26,5 +23,26 @@ export class AppComponent {
 
   getManipulatorClass() {
     return ConcreteImageManipulator;
+  }
+
+  readyToTransform(): void {
+    if (this.manipulator == null) {
+      return;
+    }
+    const manip = this.manipulator.retrieveManipulator();
+    if (manip == null) {
+      return;
+    }
+    this.manipulator.startTransform((data) => {
+      return manip.performWork(data);
+    });
+  }
+
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (this.manipulator == null) {
+      return;
+    }
+    this.blob = file;
   }
 }
