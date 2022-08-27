@@ -1,4 +1,4 @@
-import { progressCallback } from './worker-factory';
+import { progressCallback } from '../helper';
 
 /**
  * Base class for custom image manipulation classes. Provides the basic functionality that is required for the ImageManipulatorComponent to show
@@ -6,8 +6,8 @@ import { progressCallback } from './worker-factory';
  * The initialization function only needs to be called inside this library!
  */
 export abstract class ImageManipulator {
-  private callback: progressCallback | null = null;
-  private stopFlag = false;
+  protected callback: progressCallback | null = null;
+  protected stopFlag = false;
 
   init(progress: progressCallback): void {
     this.callback = progress;

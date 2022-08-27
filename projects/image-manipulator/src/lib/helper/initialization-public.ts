@@ -1,11 +1,12 @@
-import { ImageManipulator } from './image-manipulator';
 import * as Comlink from 'comlink';
 import { Remote } from 'comlink';
 import { Subject } from 'rxjs';
+import { ImageManipulator } from '../manipulation-service/image-manipulator';
+
+export type progressCallback = (progress: number) => void;
 
 export function isWebWorkerAvailable(): boolean {
-  //return typeof Worker !== 'undefined';
-  return true;
+  return typeof Worker !== 'undefined';
 }
 
 function proxyWorker<T extends ImageManipulator>(given: Remote<T>): Remote<T> {

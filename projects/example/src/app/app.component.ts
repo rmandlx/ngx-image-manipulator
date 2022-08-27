@@ -1,5 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { ImageManipulatorComponent } from 'image-manipulator';
+import {
+  ImageManipulatorComponent,
+  ManipulationService,
+} from 'image-manipulator';
 import { ConcreteImageManipulator } from './concrete-manipulator';
 
 @Component({
@@ -9,33 +12,26 @@ import { ConcreteImageManipulator } from './concrete-manipulator';
 })
 export class AppComponent {
   title = 'example';
-  @ViewChild('manipulator')
-  manipulator: ImageManipulatorComponent<ConcreteImageManipulator> | null = null;
 
   blob: Blob | null = null;
 
-  constructor() {}
+  @ViewChild('manipulatorComponent')
+  public manipulatorComponent: ImageManipulatorComponent | null = null;
 
-  async stop() {
-    const manipulator = this.manipulator?.retrieveManipulator();
-    await manipulator?.stop();
-  }
+  constructor(
+    private manipulator: ManipulationService<ConcreteImageManipulator>
+  ) {}
 
-  getManipulatorClass() {
-    return ConcreteImageManipulator;
-  }
-
-  readyToTransform(): void {
-    if (this.manipulator == null) {
+  async readyToTransform(): Promise<void> {
+    if (this.manipulator == null || this.manipulatorComponent == null) {
       return;
     }
-    const manip = this.manipulator.retrieveManipulator();
-    if (manip == null) {
-      return;
-    }
-    this.manipulator.startTransform((data) => {
-      return manip.performWork(data);
-    });
+
+    const worker = await this.manipulator.getWorker();
+    this.manipulatorComponent.startTransform(
+      worker.performWork,
+      this.manipulator.getProgress()
+    );
   }
 
   onFileSelected(event: any) {

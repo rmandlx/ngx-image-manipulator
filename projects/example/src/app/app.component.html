@@ -7,5 +7,4 @@
 </div>
 
 
-<ngx-image-manipulator [manipulatorClass]="getManipulatorClass()" (readyToTransform)="this.readyToTransform()" [pictureInput]="this.blob" #manipulator></ngx-image-manipulator>
-<button (click)="this.stop()">Stop</button>
+<ngx-image-manipulator #manipulatorComponent (readyToTransform)="this.readyToTransform()" [pictureData]="blob"></ngx-image-manipulator>
