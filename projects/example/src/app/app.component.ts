@@ -28,7 +28,7 @@ export class AppComponent {
     }
 
     const worker = await this.manipulator.getWorker();
-    this.manipulatorComponent.startTransform(
+    await this.manipulatorComponent.startTransform(
       worker.performWork,
       this.manipulator.getProgress()
     );
