@@ -11,34 +11,54 @@ import { ConcreteImageManipulator } from './concrete-manipulator';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'example';
-
   blob: Blob | null = null;
+  readyForTransformation = false;
 
   @ViewChild('manipulatorComponent')
   public manipulatorComponent: ImageManipulatorComponent | null = null;
 
   constructor(
-    private manipulator: ManipulationService<ConcreteImageManipulator>
+    private readonly manipulatorService: ManipulationService<ConcreteImageManipulator>
   ) {}
 
-  async readyToTransform(): Promise<void> {
-    if (this.manipulator == null || this.manipulatorComponent == null) {
-      return;
+  finishedTransform(data: ImageData): void {
+    console.log('Width: ' + data.width + ' Height: ' + data.height);
+  }
+
+  async startTransform(): Promise<void> {
+    if (this.manipulatorComponent == null) {
+      throw new Error(
+        'Cannot transform when the ManipulatorComponent is not initialized.'
+      );
     }
 
-    const worker = await this.manipulator.getWorker();
-    await this.manipulatorComponent.startTransform(
-      worker.performWork,
-      this.manipulator.getProgress()
+    const worker = await this.manipulatorService.getWorker();
+    this.manipulatorComponent.startTransform(
+      worker.edgeDetection,
+      this.manipulatorService.getProgress()
     );
   }
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (this.manipulator == null) {
-      return;
+  async stopTransform(): Promise<void> {
+    if (this.manipulatorComponent == null) {
+      throw new Error(
+        'Cannot transform when the ManipulatorComponent is not initialized.'
+      );
     }
-    this.blob = file;
+
+    const worker = await this.manipulatorService.getWorker();
+    worker.stop();
+  }
+
+  readyToTransform(ready: boolean): void {
+    this.readyForTransformation = ready;
+  }
+
+  /**
+   * File selection inputs the data to the image manipulator component.
+   * After the image manipulator component finished the data transformation, it will emit the readyToTransform event.
+   */
+  onFileSelected(event: any) {
+    this.blob = event.target.files[0];
   }
 }

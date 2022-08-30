@@ -1,5 +1,7 @@
-<p>Image Manipulator</p>
-<p>Current Progress: {{this.getCurrentProgress()}}</p>
-<img #imgElement style="display:none" [src]="this.imgElementSrc">
-<canvas #canvasHelper></canvas>
-<canvas #canvasElement></canvas>
+<div [ngClass]="{'display-none': this.hide}">
+  <p>Current Progress: {{this.getCurrentProgress()}}</p>
+  <img #imgElement style="display:none" [src]="this.imgElementSrc">
+  <canvas style="max-width: 50%" #canvasHelper></canvas>
+  <canvas style="max-width: 50%" #canvasElement></canvas>
+</div>
+

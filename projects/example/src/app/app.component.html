@@ -1,10 +1,10 @@
+<input type="file" class="file-input" (change)="onFileSelected($event)">
 
-<input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload>
-
-<div class="file-upload">
-  <p>Datei auswählen</p>
-  <button (click)="fileUpload.click()">Auswählen</button>
-</div>
-
-
-<ngx-image-manipulator #manipulatorComponent (readyToTransform)="this.readyToTransform()" [pictureData]="blob"></ngx-image-manipulator>
+<ngx-image-manipulator #manipulatorComponent
+                       (readyToTransform)="this.readyToTransform($event)"
+                       (finishedTransform)="this.finishedTransform($event)"
+                       [pictureData]="blob"
+                       [hide]="false"
+></ngx-image-manipulator>
+<button (click)="this.startTransform()" [disabled]="!this.readyForTransformation">Transformieren!</button>
+<button (click)="this.stopTransform()" [disabled]="!this.readyForTransformation">Stoppen</button>

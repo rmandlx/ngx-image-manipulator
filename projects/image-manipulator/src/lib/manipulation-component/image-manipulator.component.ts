@@ -56,11 +56,15 @@ export class ImageManipulatorComponent implements AfterViewInit {
     }
   }
 
-  public _pictureData: string | Blob | ImageData | null = null;
+  @Input()
+  public hide: boolean = true;
 
   @Output()
   public readyToTransform: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output()
+  public finishedTransform: EventEmitter<ImageData> = new EventEmitter<ImageData>();
 
+  public _pictureData: string | Blob | ImageData | null = null;
   public imgElementSrc: string | SafeUrl = '';
   public _transformedImageData: ImageData | null = null;
 
@@ -80,6 +84,7 @@ export class ImageManipulatorComponent implements AfterViewInit {
       throw new Error('Img Element was not loaded');
     }
 
+    //
     this._imageElement.nativeElement.onload = () => {
       this.canvasHelper.width = this.imageElement.width;
       this.canvasHelper.height = this.imageElement.height;
@@ -90,7 +95,7 @@ export class ImageManipulatorComponent implements AfterViewInit {
         this.canvasHelper.width,
         this.canvasHelper.height
       );
-      this.readyToTransform.next();
+      this.readyToTransform.next(true);
     };
   }
 
@@ -110,6 +115,7 @@ export class ImageManipulatorComponent implements AfterViewInit {
     this.canvasElement.width = finishedData.width;
     this.canvasElement.height = finishedData.height;
     this.canvasElementContext.putImageData(finishedData, 0, 0);
+    this.finishedTransform.next(finishedData);
     subscription.unsubscribe();
   }
 
