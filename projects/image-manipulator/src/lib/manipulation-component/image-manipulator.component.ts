@@ -4,6 +4,7 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnDestroy,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -15,7 +16,7 @@ import { Observable } from 'rxjs';
   templateUrl: './image-manipulator.component.html',
   styleUrls: ['./image-manipulator.component.css'],
 })
-export class ImageManipulatorComponent implements AfterViewInit {
+export class ImageManipulatorComponent implements OnDestroy, AfterViewInit {
   /**
    * The given data can be a base64 string, a Blob/File or ImageData.
    * In all cases you should wait with starting the transform, until the readyToTransform Event has
@@ -24,20 +25,19 @@ export class ImageManipulatorComponent implements AfterViewInit {
    */
   @Input()
   set pictureData(data: string | Blob | ImageData | null) {
+    this.reset();
     this._pictureData = data;
-    this._transformedImageData = null;
-    this.readyToTransform.next(false);
 
     // In the cases of Blob and Base64 string a HTML IMG element is used for conversion to ImageData
     // We set the imgElementSrc to given data and in the onload event of the HTML IMG element we draw the HTML IMG element to a canvas
     // From the canvas we can then retrieve the ImageData
     if (this._pictureData == null) {
-      // Do nothing
       return;
     } else if (this._pictureData instanceof Blob) {
-      //TODO: Cleanup objurl!
-      const objurl = URL.createObjectURL(data);
-      this.imgElementSrc = this.sanitizer.bypassSecurityTrustUrl(objurl);
+      this._objectUrl = URL.createObjectURL(data);
+      this.imgElementSrc = this.sanitizer.bypassSecurityTrustUrl(
+        this._objectUrl
+      );
     } else if (typeof this._pictureData === 'string') {
       if (this._pictureData.includes(';base64')) {
         this.imgElementSrc = this.sanitizer.bypassSecurityTrustUrl(
@@ -51,7 +51,7 @@ export class ImageManipulatorComponent implements AfterViewInit {
       }
     } else if (this._pictureData instanceof ImageData) {
       // If we already get correct ImageData, we just set it here
-      this._transformedImageData = this._pictureData;
+      this._imageData = this._pictureData;
       this.readyToTransform.next(true);
     }
   }
@@ -64,9 +64,15 @@ export class ImageManipulatorComponent implements AfterViewInit {
   @Output()
   public finishedTransform: EventEmitter<ImageData> = new EventEmitter<ImageData>();
 
-  public _pictureData: string | Blob | ImageData | null = null;
+  /**
+   * This is the source for the IMG Element, which is used to transform the given input data.
+   */
   public imgElementSrc: string | SafeUrl = '';
-  public _transformedImageData: ImageData | null = null;
+  public isTransforming = false;
+  private _pictureData: string | Blob | ImageData | null = null;
+  private _imageData: ImageData | null = null;
+  private currentProgress: number = 0;
+  private _objectUrl: string | null = null;
 
   @ViewChild('imgElement')
   public _imageElement: ElementRef<HTMLImageElement> | null = null;
@@ -75,21 +81,22 @@ export class ImageManipulatorComponent implements AfterViewInit {
   @ViewChild('canvasElement')
   public _canvasElement: ElementRef<HTMLCanvasElement> | null = null;
 
-  private currentProgress: number = 0;
-
   constructor(private readonly sanitizer: DomSanitizer) {}
+
+  ngOnDestroy() {
+    this.reset();
+  }
 
   ngAfterViewInit() {
     if (this._imageElement == null) {
       throw new Error('Img Element was not loaded');
     }
 
-    //
     this._imageElement.nativeElement.onload = () => {
       this.canvasHelper.width = this.imageElement.width;
       this.canvasHelper.height = this.imageElement.height;
       this.canvasHelperContext.drawImage(this.imageElement, 0, 0);
-      this._transformedImageData = this.canvasHelperContext.getImageData(
+      this._imageData = this.canvasHelperContext.getImageData(
         0,
         0,
         this.canvasHelper.width,
@@ -103,7 +110,7 @@ export class ImageManipulatorComponent implements AfterViewInit {
     transform: (data: ImageData) => Promise<ImageData>,
     progress: Observable<number>
   ): Promise<void> {
-    if (this._transformedImageData == null) {
+    if (this._imageData == null) {
       throw new Error('No image data available for transformation.');
     }
 
@@ -111,7 +118,9 @@ export class ImageManipulatorComponent implements AfterViewInit {
     const subscription = progress.subscribe(
       (progress) => (this.currentProgress = progress)
     );
-    const finishedData = await transform(this._transformedImageData);
+    this.isTransforming = true;
+    const finishedData = await transform(this._imageData);
+    this.isTransforming = false;
     this.canvasElement.width = finishedData.width;
     this.canvasElement.height = finishedData.height;
     this.canvasElementContext.putImageData(finishedData, 0, 0);
@@ -121,6 +130,18 @@ export class ImageManipulatorComponent implements AfterViewInit {
 
   public getCurrentProgress(): number {
     return this.currentProgress;
+  }
+
+  private reset() {
+    if (this._objectUrl != null) {
+      URL.revokeObjectURL(this._objectUrl);
+    }
+    this._pictureData = null;
+    this._imageData = null;
+    this.isTransforming = false;
+    this.currentProgress = 0;
+
+    this.readyToTransform.next(false);
   }
 
   private get canvasElement(): HTMLCanvasElement {

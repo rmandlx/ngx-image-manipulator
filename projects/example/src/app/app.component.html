@@ -1,10 +1,12 @@
 <input type="file" class="file-input" (change)="onFileSelected($event)">
+<div style="max-height: 50%">
+  <ngx-image-manipulator #manipulatorComponent
+                         (readyToTransform)="this.readyToTransform($event)"
+                         (finishedTransform)="this.finishedTransform($event)"
+                         [pictureData]="blob"
+                         [hide]="false"
+  ></ngx-image-manipulator>
+</div>
 
-<ngx-image-manipulator #manipulatorComponent
-                       (readyToTransform)="this.readyToTransform($event)"
-                       (finishedTransform)="this.finishedTransform($event)"
-                       [pictureData]="blob"
-                       [hide]="false"
-></ngx-image-manipulator>
 <button (click)="this.startTransform()" [disabled]="!this.readyForTransformation">Transformieren!</button>
 <button (click)="this.stopTransform()" [disabled]="!this.readyForTransformation">Stoppen</button>
