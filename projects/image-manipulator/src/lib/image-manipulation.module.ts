@@ -1,6 +1,5 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PictureDataTransformerComponent } from './picture-data-transformer';
 import { ImageManipulatorComponent } from './manipulation-component';
 import {
   IMAGEMANIPULATION_WEBWORKER_FACTORY,
@@ -11,10 +10,10 @@ import {
 import { Class } from './helper/class';
 
 @NgModule({
-  declarations: [PictureDataTransformerComponent, ImageManipulatorComponent],
+  declarations: [ImageManipulatorComponent],
   imports: [CommonModule],
   providers: [],
-  exports: [PictureDataTransformerComponent, ImageManipulatorComponent],
+  exports: [ImageManipulatorComponent],
 })
 export class ImageManipulationModule {
   static forRoot<T extends ImageManipulator>(

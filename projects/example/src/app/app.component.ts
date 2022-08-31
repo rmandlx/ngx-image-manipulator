@@ -4,6 +4,11 @@ import {
   ManipulationService,
 } from 'image-manipulator';
 import { ConcreteImageManipulator } from './concrete-manipulator';
+import {
+  transformBlobToImageData,
+  transformImageDataToBase64,
+  transformImageDataToBlob,
+} from '../../../image-manipulator/src/lib/picture-data-transformer';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +16,7 @@ import { ConcreteImageManipulator } from './concrete-manipulator';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  blob: Blob | null = null;
+  blob: ImageData | null = null;
   readyForTransformation = false;
 
   @ViewChild('manipulatorComponent')
@@ -21,8 +26,12 @@ export class AppComponent {
     private readonly manipulatorService: ManipulationService<ConcreteImageManipulator>
   ) {}
 
-  finishedTransform(data: ImageData): void {
+  async finishedTransform(data: ImageData): Promise<void> {
     console.log('Width: ' + data.width + ' Height: ' + data.height);
+    console.log('transforming finished data to blob:');
+    console.log(await transformImageDataToBlob(data));
+    console.log('transforming finished data to base64:');
+    console.log(await transformImageDataToBase64(data));
   }
 
   async startTransform(): Promise<void> {
@@ -58,7 +67,12 @@ export class AppComponent {
    * File selection inputs the data to the image manipulator component.
    * After the image manipulator component finished the data transformation, it will emit the readyToTransform event.
    */
-  onFileSelected(event: any) {
-    this.blob = event.target.files[0];
+  async onFileSelected(event: any) {
+    console.log('Selected blob:');
+    console.log(event.target.files[0]);
+    console.log('converting to base64:');
+    const b64 = await transformBlobToImageData(event.target.files[0]);
+    console.log(b64);
+    this.blob = b64;
   }
 }
