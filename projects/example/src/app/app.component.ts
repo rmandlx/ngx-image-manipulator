@@ -2,13 +2,11 @@ import { Component, ViewChild } from '@angular/core';
 import {
   ImageManipulatorComponent,
   ManipulationService,
-} from 'image-manipulator';
-import { ConcreteImageManipulator } from './concrete-manipulator';
-import {
   transformBlobToImageData,
   transformImageDataToBase64,
   transformImageDataToBlob,
-} from '../../../image-manipulator/src/lib/picture-data-transformer';
+} from 'image-manipulator';
+import { ConcreteImageManipulator } from './concrete-manipulator';
 
 @Component({
   selector: 'app-root',
@@ -58,11 +56,6 @@ export class AppComponent {
     const worker = await this.manipulatorService.getWorker();
     worker.stop();
   }
-
-  readyToTransform(ready: boolean): void {
-    this.readyForTransformation = ready;
-  }
-
   /**
    * File selection inputs the data to the image manipulator component.
    * After the image manipulator component finished the data transformation, it will emit the readyToTransform event.

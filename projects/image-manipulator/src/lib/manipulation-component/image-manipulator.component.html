@@ -1,7 +1,5 @@
 <div [ngClass]="{'display-none': this.hide}">
-  <p *ngIf="this.isTransforming">Current Progress: {{this.getCurrentProgress()}}</p>
-  <img #imgElement style="display:none" [src]="this.imgElementSrc">
-  <canvas style="display:none" #canvasHelper></canvas>
-  <canvas [ngClass]="{'display-none': this.isTransforming}" style="max-width: 100%; max-height: 100%" #canvasElement></canvas>
+  <p *ngIf="this.isTransforming()">Current Progress: {{this.getCurrentProgress()}}</p>
+  <canvas [ngClass]="{'display-none': this.isTransforming()}" style="max-width: 100%; max-height: 100%" #canvasElement></canvas>
 </div>
 
