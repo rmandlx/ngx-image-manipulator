@@ -4,9 +4,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { ConcreteImageManipulator } from './concrete-manipulator';
 import { ImageManipulationModule } from 'image-manipulator';
+import { BlobPipe } from './blob.pipe';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, BlobPipe],
   imports: [
     ImageManipulationModule.forRoot(
       () => new Worker(new URL('test.worker', import.meta.url)),

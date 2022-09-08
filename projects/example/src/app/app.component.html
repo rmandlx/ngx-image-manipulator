@@ -1,11 +1,19 @@
 <input type="file" class="file-input" (change)="onFileSelected($event)">
-<div style="max-height: 50%">
-  <ngx-image-manipulator #manipulatorComponent
-                         (finishedTransform)="this.finishedTransform($event)"
-                         [pictureData]="blob"
-                         [hide]="false"
-  ></ngx-image-manipulator>
+<br>
+<img alt="No image loaded yet" [src]="this.blob | blobPipe" style="height:400px">
+
+<ngx-image-manipulator #manipulatorComponent
+                       (transformedData)="this.finishedTransform($event)"
+                       (currentlyTransforming)="this.currentlyTransforming = $event"
+                       [pictureData]="blob"
+                       [outputType]="'imageData'"
+></ngx-image-manipulator>
+<div style="height:400px">
+  <canvas [ngClass]="{'hide-canvas': this.finishedImageData === null}" #canvasElement style="height: 100%"></canvas>
 </div>
 
-<button (click)="this.startTransform()">Transformieren!</button>
-<button (click)="this.stopTransform()">Stoppen</button>
+<br>
+
+
+<button (click)="this.startTransform()" [disabled]="this.blob===null || this.currentlyTransforming">Transformieren!</button>
+<button (click)="this.stopTransform()" [disabled]="!this.currentlyTransforming">Stoppen</button>

@@ -28,18 +28,24 @@ export class ImageManipulatorComponent {
   public pictureData: string | ImageData | Blob | null = null;
 
   @Input()
-  public hide: boolean = true;
+  public outputType: 'imageBitmap' | 'imageData' = 'imageData';
 
   @Output()
-  public finishedTransform: EventEmitter<ImageData> = new EventEmitter<ImageData>();
+  public transformedData: EventEmitter<ImageData | ImageBitmap> =
+    new EventEmitter<ImageData | ImageBitmap>();
+
+  @Output()
+  public currentlyTransforming: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  @ViewChild('progressDiv')
+  public progressDiv: ElementRef<HTMLDivElement> | null = null;
 
   private _isTransforming: boolean = false;
   private _currentProgress: number = 0;
 
-  @ViewChild('canvasElement')
-  public _canvasElement: ElementRef<HTMLCanvasElement> | null = null;
-
-  constructor() {}
+  constructor() {
+    this.currentlyTransforming.next(false);
+  }
 
   public async startTransform(
     transform: (data: ImageData) => Promise<ImageData>,
@@ -63,17 +69,37 @@ export class ImageManipulatorComponent {
     }
 
     this._currentProgress = 0;
-    const subscription = progress.subscribe(
-      (progress) => (this._currentProgress = progress)
-    );
+    const subscription = progress.subscribe((progress) => {
+      this._currentProgress = progress;
+      if (this.progressDiv != null) {
+        this.progressDiv.nativeElement.style.width = progress + '%';
+      }
+    });
     this._isTransforming = true;
-    const finishedData = await transform(imageDataToTransform);
-    this._isTransforming = false;
-    this.canvasElement.width = finishedData.width;
-    this.canvasElement.height = finishedData.height;
-    this.canvasElementContext.putImageData(finishedData, 0, 0);
-    this.finishedTransform.next(finishedData);
-    subscription.unsubscribe();
+    this.currentlyTransforming.next(true);
+    try {
+      const finishedData = await transform(imageDataToTransform);
+
+      if (this.outputType === 'imageData') {
+        this.transformedData.next(finishedData);
+      } else if (this.outputType === 'imageBitmap') {
+        const offscreenCanvas = new OffscreenCanvas(
+          finishedData.width,
+          finishedData.height
+        );
+        const offscreenCanvasContext = offscreenCanvas.getContext('2d');
+        if (offscreenCanvasContext == null) {
+          throw new Error('Could not get 2d context from Offscreen Canvas.');
+        }
+        offscreenCanvasContext.putImageData(finishedData, 0, 0);
+        this.transformedData.next(offscreenCanvas.transferToImageBitmap());
+      }
+    } finally {
+      // Makes sure that the transformation is declared as stopped, even if transform might throw errors
+      this.currentlyTransforming.next(false);
+      this._isTransforming = false;
+      subscription.unsubscribe();
+    }
   }
 
   public getCurrentProgress(): number {
@@ -82,20 +108,5 @@ export class ImageManipulatorComponent {
 
   public isTransforming(): boolean {
     return this._isTransforming;
-  }
-
-  private get canvasElement(): HTMLCanvasElement {
-    if (this._canvasElement == null) {
-      throw new Error('Could not retrieve Canvas Helper.');
-    }
-    return this._canvasElement.nativeElement;
-  }
-
-  private get canvasElementContext(): CanvasRenderingContext2D {
-    const context = this.canvasElement.getContext('2d');
-    if (context == null) {
-      throw new Error('Could not retrieve Canvas Helper Context.');
-    }
-    return context;
   }
 }

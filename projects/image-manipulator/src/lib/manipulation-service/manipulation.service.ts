@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken, OnInit } from '@angular/core';
+import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Class } from '../helper/class';
 import { ImageManipulator } from './image-manipulator';
@@ -14,7 +14,7 @@ export const MANIPULATOR_CLASS = new InjectionToken<ImageManipulator>(
 );
 
 @Injectable()
-export class ManipulationService<T extends ImageManipulator> implements OnInit {
+export class ManipulationService<T extends ImageManipulator> {
   private progressSubject: Subject<number> = new Subject<number>();
   private remoteWorker: Remote<T> | null = null;
 
@@ -23,8 +23,6 @@ export class ManipulationService<T extends ImageManipulator> implements OnInit {
     private webworkerFactory: () => Worker,
     @Inject(MANIPULATOR_CLASS) private manipulatorClass: Class<T>
   ) {}
-
-  async ngOnInit(): Promise<void> {}
 
   private async tryInit(): Promise<void> {
     if (this.remoteWorker == null) {

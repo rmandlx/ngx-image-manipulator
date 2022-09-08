@@ -1,10 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import {
   ImageManipulatorComponent,
   ManipulationService,
-  transformBlobToImageData,
-  transformImageDataToBase64,
-  transformImageDataToBlob,
 } from 'image-manipulator';
 import { ConcreteImageManipulator } from './concrete-manipulator';
 
@@ -14,24 +11,40 @@ import { ConcreteImageManipulator } from './concrete-manipulator';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  blob: ImageData | null = null;
-  readyForTransformation = false;
+  blob: Blob | null = null;
+  currentlyTransforming = false;
+  finishedImageData: ImageData | null = null;
 
   @ViewChild('manipulatorComponent')
   public manipulatorComponent: ImageManipulatorComponent | null = null;
+  @ViewChild('canvasElement')
+  public canvasElement: ElementRef<HTMLCanvasElement> | null = null;
 
   constructor(
     private readonly manipulatorService: ManipulationService<ConcreteImageManipulator>
   ) {}
 
-  async finishedTransform(data: ImageData): Promise<void> {
+  async finishedTransform(data: ImageData | ImageBitmap): Promise<void> {
+    if (data instanceof ImageBitmap) {
+      throw new Error('Expected ImageData');
+    }
+
     console.log('Width: ' + data.width + ' Height: ' + data.height);
-    console.log('transforming finished data to blob:');
-    console.log(await transformImageDataToBlob(data));
-    console.log('transforming finished data to base64:');
-    console.log(await transformImageDataToBase64(data));
+    this.finishedImageData = data;
+    if (this.canvasElement != null) {
+      const context = this.canvasElement.nativeElement.getContext('2d');
+      if (context == null) {
+        throw new Error('Could not retrieve 2d context of canvas element.');
+      }
+      this.canvasElement.nativeElement.width = data.width;
+      this.canvasElement.nativeElement.height = data.height;
+      context.putImageData(data, 0, 0);
+    }
   }
 
+  /**
+   * Called by button to start the transform
+   */
   async startTransform(): Promise<void> {
     if (this.manipulatorComponent == null) {
       throw new Error(
@@ -39,13 +52,19 @@ export class AppComponent {
       );
     }
 
+    this.finishedImageData = null;
+
     const worker = await this.manipulatorService.getWorker();
-    this.manipulatorComponent.startTransform(
+
+    await this.manipulatorComponent.startTransform(
       worker.edgeDetection,
       this.manipulatorService.getProgress()
     );
   }
 
+  /**
+   * Called by button to stop the current transformation.
+   */
   async stopTransform(): Promise<void> {
     if (this.manipulatorComponent == null) {
       throw new Error(
@@ -56,16 +75,12 @@ export class AppComponent {
     const worker = await this.manipulatorService.getWorker();
     worker.stop();
   }
+
   /**
    * File selection inputs the data to the image manipulator component.
-   * After the image manipulator component finished the data transformation, it will emit the readyToTransform event.
    */
   async onFileSelected(event: any) {
-    console.log('Selected blob:');
-    console.log(event.target.files[0]);
-    console.log('converting to base64:');
-    const b64 = await transformBlobToImageData(event.target.files[0]);
-    console.log(b64);
-    this.blob = b64;
+    console.log('Blob was selected.');
+    this.blob = event.target.files[0];
   }
 }

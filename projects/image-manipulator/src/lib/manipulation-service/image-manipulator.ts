@@ -7,21 +7,14 @@ import { progressCallback } from '../helper';
  */
 export abstract class ImageManipulator {
   protected callback: progressCallback | null = null;
-  protected stopFlag = false;
+  protected stopCounter = 0;
 
   init(progress: progressCallback): void {
     this.callback = progress;
   }
 
-  reset(): void {
-    this.stopFlag = false;
-  }
-
   stop(): void {
-    if (this.callback != null) {
-      this.callback(0);
-    }
-    this.stopFlag = true;
+    this.stopCounter += 1;
   }
 
   /**
@@ -33,14 +26,14 @@ export abstract class ImageManipulator {
       throw new Error('No progress callback initialized.');
     }
 
-    this.callback(progress);
-
     // This allows that the stop function may be called.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    if (this.stopFlag) {
-      this.stopFlag = false;
+    if (this.stopCounter > 0) {
+      this.stopCounter -= 1;
       throw new Error('Function was stopped!');
     }
+
+    this.callback(progress);
   }
 }
