@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { ConcreteImageManipulator } from './concrete-manipulator';
-import { ImageManipulationModule } from 'image-manipulator';
+import { ImageManipulationModule } from 'ngx-image-manipulator';
 import { BlobPipe } from './blob.pipe';
 
 @NgModule({

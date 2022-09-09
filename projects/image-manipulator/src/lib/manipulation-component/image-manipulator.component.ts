@@ -69,6 +69,9 @@ export class ImageManipulatorComponent {
     }
 
     this._currentProgress = 0;
+    if (this.progressDiv != null) {
+      this.progressDiv.nativeElement.style.width = '0%';
+    }
     const subscription = progress.subscribe((progress) => {
       this._currentProgress = progress;
       if (this.progressDiv != null) {

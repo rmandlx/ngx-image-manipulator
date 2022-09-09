@@ -2,12 +2,15 @@
 <br>
 <img alt="No image loaded yet" [src]="this.blob | blobPipe" style="height:400px">
 
-<ngx-image-manipulator #manipulatorComponent
-                       (transformedData)="this.finishedTransform($event)"
-                       (currentlyTransforming)="this.currentlyTransforming = $event"
-                       [pictureData]="blob"
-                       [outputType]="'imageData'"
-></ngx-image-manipulator>
+<div style="width: 30%">
+  <ngx-image-manipulator #manipulatorComponent
+                         (transformedData)="this.finishedTransform($event)"
+                         (currentlyTransforming)="this.currentlyTransforming = $event"
+                         [pictureData]="blob"
+                         [outputType]="'imageData'"
+  ></ngx-image-manipulator>
+</div>
+
 <div style="height:400px">
   <canvas [ngClass]="{'hide-canvas': this.finishedImageData === null}" #canvasElement style="height: 100%"></canvas>
 </div>

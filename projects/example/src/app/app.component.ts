@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import {
   ImageManipulatorComponent,
   ManipulationService,
-} from 'image-manipulator';
+} from 'ngx-image-manipulator';
 import { ConcreteImageManipulator } from './concrete-manipulator';
 
 @Component({
@@ -21,7 +21,7 @@ export class AppComponent {
   public canvasElement: ElementRef<HTMLCanvasElement> | null = null;
 
   constructor(
-    private readonly manipulatorService: ManipulationService<ConcreteImageManipulator>
+    private readonly manipulatonService: ManipulationService<ConcreteImageManipulator>
   ) {}
 
   async finishedTransform(data: ImageData | ImageBitmap): Promise<void> {
@@ -54,11 +54,11 @@ export class AppComponent {
 
     this.finishedImageData = null;
 
-    const worker = await this.manipulatorService.getWorker();
+    const worker = await this.manipulatonService.getWorker();
 
     await this.manipulatorComponent.startTransform(
       worker.edgeDetection,
-      this.manipulatorService.getProgress()
+      this.manipulatonService.getProgress()
     );
   }
 
@@ -72,7 +72,7 @@ export class AppComponent {
       );
     }
 
-    const worker = await this.manipulatorService.getWorker();
+    const worker = await this.manipulatonService.getWorker();
     worker.stop();
   }
 

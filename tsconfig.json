@@ -8,9 +8,9 @@
     "strict": true,
     "noImplicitReturns": true,
     "paths": {
-      "image-manipulator": [
-        "dist/image-manipulator/image-manipulator",
-        "dist/image-manipulator"
+      "ngx-image-manipulator": [
+        "dist/ngx-image-manipulator/ngx-image-manipulator",
+        "dist/ngx-image-manipulator"
       ]
     },
     "noFallthroughCasesInSwitch": true,
