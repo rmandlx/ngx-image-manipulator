@@ -1,4 +1,4 @@
-import { ImageManipulator } from 'image-manipulator';
+import { ImageManipulator } from 'ngx-image-manipulator';
 
 export class ConcreteImageManipulator extends ImageManipulator {
   async edgeDetection(imageData: ImageData): Promise<ImageData> {

@@ -1,5 +1,23 @@
 {
   "name": "ngx-image-manipulator",
+  "author": "Peter Herbst",
+  "description": "A lightweight angular library that helps with executing performance intensive image editing tasks in a web worker.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richmandlx/ngx-image-manipulator"
+  },
+  "bugs": {
+    "url": "https://github.com/richmandlx/ngx-image-manipulator/issues"
+  },
+  "homepage": "https://github.com/richmandlx/ngx-image-manipulator",
+  "keywords": [
+    "angular",
+    "typescript",
+    "javascript",
+    "image-manipulation",
+    "webworker"
+  ],
+  "license": "AGPLv3",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^12.2.0",
