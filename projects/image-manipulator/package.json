@@ -20,9 +20,9 @@
   "license": "AGPLv3",
   "version": "0.0.3",
   "peerDependencies": {
-    "@angular/common": "^12.2.0",
-    "@angular/core": "^12.2.0",
-    "rxjs": "^6.6.0"
+    "@angular/common": ">=12.2.0",
+    "@angular/core": ">=12.2.0",
+    "rxjs": ">=6.6.0"
   },
   "dependencies": {
     "comlink": "^4.3.1",
