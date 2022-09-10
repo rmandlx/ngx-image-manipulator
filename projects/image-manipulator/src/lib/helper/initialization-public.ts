@@ -42,6 +42,8 @@ export async function initLocal<T extends ImageManipulator>(
     const callbProxy = Comlink.proxy((progress: number) => {
       progressSubject.next(progress);
     });
+    // Making sure, that init is only called in this library, but this is hacky!
+    // @ts-ignore
     await obj.init(callbProxy);
     return obj;
   } else {
@@ -49,6 +51,8 @@ export async function initLocal<T extends ImageManipulator>(
     const callbProxy = (progress: number) => {
       progressSubject.next(progress);
     };
+    // Making sure, that init is only called in this library, but this is hacky!
+    // @ts-ignore
     await obj.init(callbProxy);
     return proxyWorker(obj as Remote<T>);
   }

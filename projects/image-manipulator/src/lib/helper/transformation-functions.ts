@@ -46,7 +46,7 @@ export function transformBase64ToBlob(base64: string): Promise<Blob> {
 }
 
 /**
- * The given base64 string needs to start with data:image;base64,
+ * The given base64 string needs to start with "data:image;base64,"
  * Can throw errors.
  * @param base64
  */

@@ -2,7 +2,7 @@ import { ImageManipulator } from 'ngx-image-manipulator';
 
 export class ConcreteImageManipulator extends ImageManipulator {
   async edgeDetection(imageData: ImageData): Promise<ImageData> {
-    await this.progressCallback(0);
+    await this.setProgress(0);
 
     const result = new Uint8ClampedArray(imageData.data.length);
     result.fill(255);
@@ -10,9 +10,7 @@ export class ConcreteImageManipulator extends ImageManipulator {
     for (let x = 0; x < imageData.width; x++) {
       // We devide the loop over x in 10 progress steps
       if (x % Math.floor(imageData.width / 10) === 0) {
-        await this.progressCallback(
-          Math.floor(x / (imageData.width / 10)) * 10
-        );
+        await this.setProgress(Math.floor(x / (imageData.width / 10)) * 10);
       }
 
       for (let y = 0; y < imageData.height; y++) {
@@ -60,7 +58,7 @@ export class ConcreteImageManipulator extends ImageManipulator {
       }
     }
 
-    await this.progressCallback(100);
+    await this.setProgress(100);
     return new ImageData(result, imageData.width, imageData.height);
   }
 }

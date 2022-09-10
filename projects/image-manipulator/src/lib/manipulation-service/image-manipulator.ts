@@ -1,29 +1,30 @@
-import { progressCallback } from '../helper';
+import { progressCallback, TransformationCancelledError } from '../helper';
 
 /**
  * Base class for custom image manipulation classes. Provides the basic functionality that is required for the ImageManipulatorComponent to show
  * progress and the final result.
- * The initialization function only needs to be called inside this library!
  */
 export abstract class ImageManipulator {
   protected callback: progressCallback | null = null;
   protected stopCounter = 0;
 
-  init(progress: progressCallback): void {
+  private init(progress: progressCallback): void {
     this.callback = progress;
   }
 
-  stop(): void {
+  stopExecution(): void {
     this.stopCounter += 1;
   }
 
   /**
-   * Can be used to show progress to the frontend.
-   * Whenever this Method is called, the worker gets the opportunity to stop the execution of the current function!
+   * Can be used to deliver information on progress to the main thread.
+   * Whenever this method is called, the worker gets the opportunity to stop the execution of the current function!
    */
-  async progressCallback(progress: number): Promise<void> {
+  async setProgress(progress: number): Promise<void> {
     if (this.callback == null) {
-      throw new Error('No progress callback initialized.');
+      throw new Error(
+        'The progress callback has not been initialized. Most likely the init method was not called.'
+      );
     }
 
     // This allows that the stop function may be called.
@@ -31,7 +32,10 @@ export abstract class ImageManipulator {
 
     if (this.stopCounter > 0) {
       this.stopCounter -= 1;
-      throw new Error('Function was stopped!');
+      throw new TransformationCancelledError(
+        'The execution of the transformation was stopped.',
+        progress
+      );
     }
 
     this.callback(progress);

@@ -18,14 +18,14 @@
     "webworker"
   ],
   "license": "AGPLv3",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "peerDependencies": {
     "@angular/common": "^12.2.0",
     "@angular/core": "^12.2.0",
-    "comlink": "^4.3.1",
     "rxjs": "^6.6.0"
   },
   "dependencies": {
+    "comlink": "^4.3.1",
     "tslib": "^2.3.0"
   }
 }

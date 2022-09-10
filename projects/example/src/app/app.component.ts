@@ -73,7 +73,7 @@ export class AppComponent {
     }
 
     const worker = await this.manipulatonService.getWorker();
-    worker.stop();
+    worker.stopExecution();
   }
 
   /**
