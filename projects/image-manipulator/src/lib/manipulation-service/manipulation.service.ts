@@ -2,7 +2,7 @@ import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Class } from '../helper/class';
 import { ImageManipulator } from './image-manipulator';
-import { initLocal } from '../helper';
+import { initLocal, isWebWorkerAvailable } from '../helper';
 import { Remote } from 'comlink';
 
 export const IMAGEMANIPULATION_WEBWORKER_FACTORY = new InjectionToken<
@@ -49,5 +49,9 @@ export class ManipulationService<T extends ImageManipulator> {
 
   getProgress(): Observable<number> {
     return this.progressSubject.asObservable();
+  }
+
+  isWebWorkerAvailable(): boolean {
+    return isWebWorkerAvailable();
   }
 }

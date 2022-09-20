@@ -128,3 +128,30 @@ export function transformImageDataToBlob(imageData: ImageData): Promise<Blob> {
     });
   });
 }
+
+/**
+ * Bitmap can be held in GPU memory and is faster for drawing.
+ * @param base64
+ */
+export function transformImageDataToImageBitmap(
+  imageData: ImageData
+): Promise<ImageBitmap> {
+  return new Promise((resolve, reject) => {
+    const canvas = new OffscreenCanvas(imageData.width, imageData.height);
+    const canvasContext = canvas.getContext('2d');
+    if (canvasContext == null) {
+      reject(
+        new Error(
+          'Could not get canvas context for conversion from ImageData to Blob.'
+        )
+      );
+      return;
+    }
+    canvasContext.putImageData(imageData, 0, 0);
+    if (typeof canvas.transferToImageBitmap === 'function') {
+      resolve(canvas.transferToImageBitmap());
+    } else {
+      resolve(createImageBitmap(canvas));
+    }
+  });
+}
