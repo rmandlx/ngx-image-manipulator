@@ -3,7 +3,10 @@
  * The caller needs to clean up the src (if its an object url)!
  * @param src Image source. Can be a base64 string or a string to a resource URL.
  */
-function convertImgSrcToImageData(src: string): Promise<ImageData> {
+function convertImgSrcToImageData(
+  src: string,
+  resize?: { newWidth: number; newHeight: number }
+): Promise<ImageData> {
   return new Promise<ImageData>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -17,9 +20,16 @@ function convertImgSrcToImageData(src: string): Promise<ImageData> {
         );
         return;
       }
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvasContext.drawImage(img, 0, 0);
+      if (resize == null) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvasContext.drawImage(img, 0, 0);
+      } else {
+        canvas.width = resize.newWidth;
+        canvas.height = resize.newHeight;
+        canvasContext.drawImage(img, 0, 0, resize.newWidth, resize.newHeight);
+      }
+
       const imageData = canvasContext.getImageData(
         0,
         0,
@@ -50,8 +60,11 @@ export function transformBase64ToBlob(base64: string): Promise<Blob> {
  * Can throw errors.
  * @param base64
  */
-export function transformBase64ToImageData(base64: string): Promise<ImageData> {
-  return convertImgSrcToImageData(base64);
+export function transformBase64ToImageData(
+  base64: string,
+  resize?: { newWidth: number; newHeight: number }
+): Promise<ImageData> {
+  return convertImgSrcToImageData(base64, resize);
 }
 
 export function transformBlobToBase64(blob: Blob): Promise<string> {
@@ -68,9 +81,12 @@ export function transformBlobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-export async function transformBlobToImageData(blob: Blob): Promise<ImageData> {
+export async function transformBlobToImageData(
+  blob: Blob,
+  resize?: { newWidth: number; newHeight: number }
+): Promise<ImageData> {
   const objUrl = URL.createObjectURL(blob);
-  const result = await convertImgSrcToImageData(objUrl);
+  const result = await convertImgSrcToImageData(objUrl, resize);
   URL.revokeObjectURL(objUrl);
   return result;
 }
