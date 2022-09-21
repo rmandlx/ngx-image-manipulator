@@ -51,7 +51,7 @@ export class ManipulationService<T extends ImageManipulator> {
     return this.progressSubject.asObservable();
   }
 
-  isWebWorkerAvailable(): boolean {
+  static isWebWorkerAvailable(): boolean {
     return isWebWorkerAvailable();
   }
 }
